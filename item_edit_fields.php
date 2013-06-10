@@ -7,6 +7,8 @@ foreach ($fields as $field) {
 	$type = $field['s_type'];
 	$name = 'field_' . $field['pk_i_id'];
 	$value = Attributes::newInstance()->getValue($item_id, $field_id); 
+	$range = $field['b_range'];
+	$steps = $field['s_steps'];
 	$required = $field['b_required'];
 	if ($required) {
 		$class = " class='required'";
@@ -30,11 +32,14 @@ foreach ($fields as $field) {
 						<input id='<?php echo $name; ?>' class='edit_checkbox' type='checkbox' name='<?php echo $name; ?>' value='checked'<?php echo $checked; ?> />
 						<?php _e('Tick for "Yes"', PLUGIN_NAME); ?>
 					</label>
-<?php } else if ($type == 'select') { ?>		
+<?php } else if ($type == 'select' || $type == 'radio' && $range == 1) { 
+														?>
+					<input id='<?php echo $name; ?>'<?php echo $class; ?> type='text' name='<?php echo $name; ?>' value='<?php echo $value; ?>' />							<?php } elseif($type == 'select' || $type == 'radio' && $range == 0) { ?>									
 					<select id='<?php echo $name; ?>'<?php echo $class; ?> name='<?php echo $name; ?>'>
-<?php ca_select_options($field_id, $value); ?>
+<?php  								
+						ca_select_options($field_id, $value); ?>
 					</select>
-<?php } else if ($type == 'radio') { ?>						
+<?php } else if ($type == 'radio' && $range == 0) { ?>						
 					<?php ca_radio_buttons($field_id, $name, $value, $required); ?>
 <?php } ?>
 				</td>
