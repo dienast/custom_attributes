@@ -136,17 +136,26 @@ function ca_search_conditions($params = null) {
 		Search::newInstance()->addConditions("s_title LIKE '%". $pattern . "%'");	
 	}
 	$values_table = Attributes::newInstance()->getTable_Values();
+	
 	foreach($params as $key => $value) {
 		$field_id = str_replace('field_', '', $key);
 		$field_type = Attributes::newInstance()->getFieldType($field_id);
+		$field_range_options = Attributes::newInstance()->getRangeOptions($field_id, $value);
+					
 		if ($field_id == $key || empty($value)) continue;
-		$subquery = "SELECT fk_i_item_id FROM " . $values_table . " WHERE fk_i_field_id = " . $field_id;
+			$subquery = "SELECT fk_i_item_id FROM " . $values_table . " WHERE fk_i_field_id = " . $field_id;
 		if ($field_type == 'text') {
-			$subquery .= " AND s_value LIKE '%" . $value . "%'";
-		} else {
-			$subquery .= " AND s_value = '" . $value . "'";
+			$subquery .= " AND s_value LIKE '%" . $value . "%'"; 
+		} else if ($field_type != 'text' && empty($field_range_options)) {
+			$subquery .= " AND s_value = '" . $value . "'"; 
 		}
-		Search::newInstance()->addConditions("pk_i_id IN (" . $subquery. ")");
+		if ($field_type == 'select' || $field_type == 'radio' && !empty($field_range_options)) {                   
+			$minmax = explode(',',$value);	
+			$min = $minmax[0];
+			$max = $minmax[1];
+			$subquery .= " AND (s_value >= " . $min . " AND s_value <= ". $max .")";                                             
+		}
+		Search::newInstance()->addConditions("pk_i_id IN (" . $subquery. ")");		
 	}	
 }
 
@@ -157,7 +166,7 @@ function ca_item_detail() {
 	$cat_id = osc_item_category_id();
 	if (osc_is_this_category(PLUGIN_NAME, $cat_id)) {
 		$item_id = osc_item_id();
-	  $groups = Attributes::newInstance()->getGroups($cat_id);
+		$groups = Attributes::newInstance()->getGroups($cat_id);
 		$order_type = osc_get_preference('order_type');
 		$fields = Attributes::newInstance()->getFields(null, $order_type);				
 		if(!empty($groups) || !empty($fields)) {
