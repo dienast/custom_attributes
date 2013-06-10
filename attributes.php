@@ -401,6 +401,28 @@ class Attributes extends DAO {
 	}		
 
 	/**
+	 * Get attribute options if range = 1
+	 * @param int $field_id
+	 * @param int $value (boolean, 0 = no 1 = yes)
+	 */
+	public function getRangeOptions($field_id, $value = null) {
+		$this->dao->select('s_options');
+		$this->dao->from($this->getTable_Fields());
+		$this->dao->where('pk_i_id', $field_id);
+		$this->dao->where('b_range', 1);
+		$this->dao->limit(1);
+		$results = $this->dao->get();
+		if (!$results) {
+			return '';
+		}		
+		$row = $results->row();
+		if (is_null($row['s_options'])) {
+			return '';
+		}
+		return $row['s_options'];
+	}	
+
+	/**
 	 * Get item title
 	 * @param string $item_id	 
 	 * @return string
@@ -439,15 +461,19 @@ class Attributes extends DAO {
 	 * @param string $type
 	 * @param string $label
 	 * @param string $options	 
+	 * @param string $range    //edited
+	 * @param string $steps    //edited
 	 * @param boolean $required
 	 * @param boolean $search
 	 * @return mixed
 	 */
-	public function insertField($type, $label, $options = null, $required = false, $search = true) {
+	public function insertField($type, $label, $options = null, $range = false, $steps = false, $required = false, $search = true) {
 		$args = array( 
 			's_type' => $type, 
 			's_label' => $label, 
 			's_options' => $options, 
+			'b_range' => $range,
+			's_steps' => $steps,
 			'b_required' => $required, 
 			'b_search' => $search
 		);
@@ -504,9 +530,9 @@ class Attributes extends DAO {
 	 * @param boolean $search
 	 * @return boolean	
 	 */
-	public function setField($field_id, $type, $label, $options = null, $required = false, $search = false) {	
+	public function setField($field_id, $type, $label, $options = null, $range = false, $steps = false, $required = false, $search = false) {	
 		$where = array('pk_i_id' => $field_id);
-		$set = array('s_type' => $type, 's_label' => $label, 's_options' => $options, 'b_required' => $required, 'b_search' => $search);
+		$set = array('s_type' => $type, 's_label' => $label, 's_options' => $options, 'b_range' => $range, 's_steps' => $steps, 'b_required' => $required, 'b_search' => $search);
 		return $this->_update($this->getTable_Fields(), $set, $where);
 	}		
 	
