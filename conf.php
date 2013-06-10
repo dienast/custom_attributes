@@ -9,9 +9,11 @@ if (!empty($action)) {
 			if (!empty($label)) {
 				$type = Params::getParam('field_type');
 				$options = Params::getParam('field_options');
+				$range = Params::getParam('field_range');
+				$steps = Params::getParam('field_steps');
 				$required = Params::getParam('field_required');
 				$search = Params::getParam('field_search');
-				$field_id = Attributes::newInstance()->insertField($type, $label, $options, $required, $search);
+				$field_id = Attributes::newInstance()->insertField($type, $label, $options, $range, $steps, $required, $search);
 				if (!empty($group_id) && !empty($field_id)) {
 					Attributes::newInstance()->insertMeta($group_id, $field_id);
 				}
@@ -47,10 +49,12 @@ if (!empty($action)) {
 			$type = Params::getParam('edit_type');
 			$label = Params::getParam('edit_label');
 			$options = Params::getParam('edit_options');
+			$range = Params::getParam('edit_range');
+			$steps = Params::getParam('edit_steps');
 			$required = Params::getParam('edit_required');
 			$search = Params::getParam('edit_search');
 			if (!empty($label)) {
-				Attributes::newInstance()->setField($field_id, $type, $label, $options, $required, $search);
+				Attributes::newInstance()->setField($field_id, $type, $label, $options, $range, $steps, $required, $search);
 				osc_add_flash_ok_message( __('Attribute saved', PLUGIN_NAME), PLUGIN_NAME);
 			} else {
 				osc_add_flash_warning_message( __('Attribute label required', PLUGIN_NAME), PLUGIN_NAME);
@@ -105,10 +109,14 @@ foreach ($groups as $group) {
 				<input type='hidden' name='file' value='<?php echo osc_plugin_folder(__FILE__); ?>conf.php' />
 				<input type='hidden' name='plugin_action' value='add_field' />
 				<input type='hidden' name='group_id' value='<?php echo $group_id; ?>' />
+				<label><?php _e('Attribute name', PLUGIN_NAME); ?></label><br />
 				<input class='text_input' type='text' name='field_label' value='' />
 				<p class='field_options'>
+					<label><?php _e('Attribute options or range', PLUGIN_NAME); ?></label><br />
 					<input class='text_input' type='text' name='field_options' value='' />
-					<span class='options_text'><?php _e('Separate options with commas (eg. a, b, c).', PLUGIN_NAME); ?></span>
+					<span class='options_text'><?php _e('Separate options with commas (eg. a, b, c).<br/> If you check Range below then give only two <br/>values: min and max (e.g. 0,5000)', PLUGIN_NAME); ?></span>									
+					<label><?php _e('Range', PLUGIN_NAME); ?><input class='checkbox_input' type='checkbox' name='field_range' value='1' /></label><br />
+					<br/><label><?php _e('Steps', PLUGIN_NAME); ?></label><br /><label><input class='text_input' type='text' name='field_steps' value='' /></label><span class="options_text">If checked Range fill in the step size (e.g. if<br/> range is 0,5000 then an appropriate size <br/>would be 100)</span>
 				</p>
 				<p>
 					<select class='field_type' name='field_type'>
@@ -160,6 +168,8 @@ foreach ($fields as $field) {
 	$type = $field['s_type'];
 	$label = trim($field['s_label']);
 	$options = $field['s_options'];
+	$range = $field['b_range'];
+	$steps = $field['s_steps'];
 	$required = $field['b_required'];
 	$search = $field['b_search'];
 	$order = $field['i_order'];
@@ -183,8 +193,14 @@ foreach ($fields as $field) {
 <?php if (!empty($options)) { ?>								
 								<li>
 									<input type='text' class='edit_options' name='edit_options' value='<?php echo $options; ?>' /><br />
-									<span class='options_text'><?php _e('Separate options with commas (eg. a, b, c).', PLUGIN_NAME); ?></span>
+									<span class='options_text'><?php _e('Separate options with commas (eg. a, b, c).', PLUGIN_NAME); ?></span>							
 								</li>
+								<li>
+								<input type='text' class='edit_steps' name='edit_steps' value='<?php echo $steps; ?>' /><br />
+									<span class='options_text'><?php _e('If checked Range fill in the step size (e.g. if
+range is 0,5000 then an appropriate size
+would be 100)', PLUGIN_NAME); ?></span>
+									</li>
 <?php } ?>
 								<li>
 									<select class='field_type' name='edit_type'>
@@ -196,7 +212,8 @@ foreach ($fields as $field) {
 								</li>
 								<li>
 									<label class='field_required'><input class='checkbox_input' type='checkbox' name='edit_required' value='1'<?php if ($required) echo " checked='checked'"; ?> /><?php _e('Require', PLUGIN_NAME); ?></label>
-									<label><input class='checkbox_input' type='checkbox' name='edit_search' value='1'<?php if ($search) echo " checked='checked'"; ?> /><?php _e('Search', PLUGIN_NAME); ?></label>							
+									<label><input class='checkbox_input' type='checkbox' name='edit_search' value='1'<?php if ($search) echo " checked='checked'"; ?> /><?php _e('Search', PLUGIN_NAME); ?></label><br />
+									<label class="field_range"><input class='checkbox_input' type='checkbox' name='edit_range' value='1'<?php if ($range) echo " checked='checked'"; ?> /><?php _e('Range', PLUGIN_NAME); ?></label>
 								</li>
 								<li><button class='btn btn-mini' type='submit'><?php _e('Save', PLUGIN_NAME); ?></button></li>
 							</form>
