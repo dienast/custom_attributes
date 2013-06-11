@@ -34,7 +34,11 @@ $version = osc_get_preference('database_version', PLUGIN_NAME);
 if (empty($version) || $version < DATABASE_VERSION) {
 	$table_exists = Attributes::newInstance()->tableExists_Fields();
 	if ($table_exists) {
-		Attributes::newInstance()->import('custom_attributes/update.sql');
+		if ($version == 1) {
+			Attributes::newInstance()->import('custom_attributes/update2.sql');
+		} else {
+			Attributes::newInstance()->import('custom_attributes/update.sql');
+		}
 	} else {
 		Attributes::newInstance()->import('custom_attributes/struct.sql');
 	}
